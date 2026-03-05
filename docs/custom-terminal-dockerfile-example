@@ -1,0 +1,86 @@
+# カスタムターミナルイメージの作成例
+# Python を事前インストールした Showroom 用ターミナル
+
+## 必要な条件
+
+Showroom の terminal コンテナとして動作させるには、以下を満たす必要があります：
+
+| 項目 | 要件 |
+|------|------|
+| **ポート** | 7681 で待ち受け（ttyd のデフォルト） |
+| **プロセス** | ttyd がシェル（bash 等）を起動 |
+| **ホーム** | `/home/lab-user` が PVC でマウントされる |
+
+---
+
+## Dockerfile 例
+
+```dockerfile
+# UBI9 ベース（Red Hat 系）
+FROM registry.access.redhat.com/ubi9/ubi-minimal:latest
+
+# 必要なパッケージをインストール
+RUN microdnf install -y \
+    bash \
+    curl \
+    python3 \
+    python3-pip \
+    && microdnf clean all
+
+# ttyd をインストール（バイナリを直接取得）
+ARG TTYD_VERSION=1.7.4
+RUN curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.x86_64" -o /usr/local/bin/ttyd \
+    && chmod +x /usr/local/bin/ttyd
+
+# lab-user 用のホームディレクトリ（PVC で上書きされる）
+RUN mkdir -p /home/lab-user && chown -R 1000:1000 /home/lab-user
+
+USER 1000
+WORKDIR /home/lab-user
+
+EXPOSE 7681
+
+# ttyd で bash を起動（-W は複数接続を許可）
+CMD ["ttyd", "-W", "bash"]
+```
+
+---
+
+## ビルドとプッシュ
+
+```bash
+# ビルド
+podman build -t quay.io/<your-org>/showroom-terminal-python:latest .
+
+# プッシュ（要ログイン）
+podman login quay.io
+podman push quay.io/<your-org>/showroom-terminal-python:latest
+```
+
+---
+
+## values.yaml での指定
+
+```yaml
+# helm/components/showroom/values.yaml または helm/values.yaml
+showroom:
+  terminal:
+    enabled: true
+    image: "quay.io/<your-org>/showroom-terminal-python:latest"  # カスタムイメージに変更
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+```
+
+---
+
+## 注意点
+
+1. **アーキテクチャ**: OpenShift クラスタのアーキテクチャ（amd64 / arm64）に合わせてビルドする
+2. **非 root**: OpenShift の SCC に合わせて `USER 1000` で実行する
+3. **ttyd のオプション**: `-W` で複数ブラウザからの同時接続を許可
+4. **追加ツール**: Dockerfile の `RUN` に `git`, `oc`, `kubectl` などを追加可能
