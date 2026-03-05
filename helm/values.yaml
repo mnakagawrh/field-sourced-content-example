@@ -52,9 +52,9 @@ components:
     name: showroom
     # Lab guide Git repository - UPDATE THIS to your content repository
     content:
-      repoUrl: "https://github.com/rhpds/showroom_template.git"
+      repoUrl: "https://github.com/rhpds/showroom_template_default.git"
       repoRef: "main"
-      antoraPlaybook: "site.yml"
+      antoraPlaybook: "default-site.yml"
       image: "quay.io/rhpds/showroom-content:v1.3.1"
     # Nookbag bundle (enables LlamaStack, multiple terminals, Zero Trust UI)
     nookbag:
