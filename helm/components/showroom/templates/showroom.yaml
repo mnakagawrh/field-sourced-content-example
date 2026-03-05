@@ -261,6 +261,27 @@ spec:
           requests:
             cpu: {{ .Values.showroom.terminal.resources.requests.cpu }}
             memory: {{ .Values.showroom.terminal.resources.requests.memory }}
+      - name: tty-bottom
+        image: {{ .Values.showroom.terminal.image | quote }}
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: terminal-lab-user-home
+          mountPath: /home/lab-user
+        ports:
+        - containerPort: 7681
+          protocol: TCP
+        resources:
+          limits:
+            cpu: {{ .Values.showroom.terminal.resources.limits.cpu }}
+            memory: {{ .Values.showroom.terminal.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.showroom.terminal.resources.requests.cpu }}
+            memory: {{ .Values.showroom.terminal.resources.requests.memory }}
       {{- end }}
       volumes:
       - name: showroom-files
