@@ -76,9 +76,10 @@ data:
           proxy_set_header X-NginX-Proxy true;
         }
         # Nookbag Zero Trust UI uses /tty-top and /tty-bottom for multi-terminal slots
-        # ttyd serves only at / - strip path and proxy to root to avoid 404
+        # ttyd serves only at / - rewrite to root then proxy (regex location cannot use proxy_pass with URI)
         location ~ ^/tty {
-          proxy_pass http://127.0.0.1:7681/;
+          rewrite ^/tty.*$ / break;
+          proxy_pass http://127.0.0.1:7681;
           proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection "upgrade";
