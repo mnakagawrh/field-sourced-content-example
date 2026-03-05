@@ -71,16 +71,6 @@ components:
         limits:
           cpu: "500m"
           memory: "1Gi"
-    tty-bottom:
-      enabled: true
-      image: "quay.io/rhpds/openshift-showroom-terminal-ocp:latest"
-      resources:
-        requests:
-          cpu: "500m"
-          memory: "512Mi"
-        limits:
-          cpu: "500m"
-          memory: "1Gi"
 
 # ============================================================
 # Values injected by field content workload (do not modify)
