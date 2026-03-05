@@ -75,8 +75,30 @@ data:
           proxy_set_header Host $http_host;
           proxy_set_header X-NginX-Proxy true;
         }
-        # Nookbag Zero Trust UI uses /tty-top and /tty-bottom for multi-terminal slots
+        # Nookbag Zero Trust UI - terminal tab types: terminal(/tty1), secondary-terminal(/tty2), double-terminal(/tty-top,/tty-bottom)
         # ttyd serves only at / - use prefix location (allows proxy_pass with URI)
+        location /tty1 {
+          proxy_pass http://127.0.0.1:7681/;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_read_timeout 43200000;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $http_host;
+          proxy_set_header X-NginX-Proxy true;
+        }
+        location /tty2 {
+          proxy_pass http://127.0.0.1:7681/;
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection "upgrade";
+          proxy_read_timeout 43200000;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header Host $http_host;
+          proxy_set_header X-NginX-Proxy true;
+        }
         location /tty-top {
           proxy_pass http://127.0.0.1:7681/;
           proxy_http_version 1.1;
